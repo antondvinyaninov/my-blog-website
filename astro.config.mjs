@@ -6,6 +6,10 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
+  // Раскомментируйте и замените на ваш репозиторий после создания на GitHub
+  // site: 'https://YOUR_USERNAME.github.io',
+  // base: '/REPO_NAME',
+  
   integrations: [react()],
 
   vite: {
