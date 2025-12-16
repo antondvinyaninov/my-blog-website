@@ -1,271 +1,313 @@
 import { useState } from 'react';
-import { LayoutDashboard, FileText, Settings, Image, Users, TrendingUp, Menu, X } from 'lucide-react';
+import { LayoutDashboard, FileText, Newspaper, BarChart3, Search, Settings, Edit } from 'lucide-react';
+import { POSTS } from '../data/posts';
+import PostEditor from './PostEditor';
+import type { Post } from '../consts';
 
-type Tab = 'dashboard' | 'posts' | 'pages' | 'media' | 'settings';
-
-interface MenuItem {
-  id: Tab;
-  name: string;
-  icon: any;
+interface AdminPanelProps {
+  activeTab?: string;
 }
 
-export default function AdminPanel() {
-  const [activeTab, setActiveTab] = useState<Tab>('dashboard');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+export default function AdminPanel({ activeTab = 'dashboard' }: AdminPanelProps) {
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const [posts, setPosts] = useState(POSTS);
 
-  const menuItems: MenuItem[] = [
-    { id: 'dashboard', name: 'Панель управления', icon: LayoutDashboard },
-    { id: 'posts', name: 'Статьи', icon: FileText },
-    { id: 'pages', name: 'Страницы', icon: FileText },
-    { id: 'media', name: 'Медиа', icon: Image },
-    { id: 'settings', name: 'Настройки', icon: Settings },
-  ];
+  const handleSavePost = async (updatedPost: Post) => {
+    // Обновляем пост в локальном состоянии
+    setPosts(posts.map(p => p.id === updatedPost.id ? updatedPost : p));
+    
+    // TODO: Отправить на сервер для сохранения
+    try {
+      const response = await fetch('/api/posts.json', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedPost)
+      });
+      
+      if (response.ok) {
+        alert('Статья успешно сохранена!');
+      }
+    } catch (error) {
+      console.error('Ошибка сохранения:', error);
+      alert('Ошибка при сохранении статьи');
+    }
+    
+    setEditingPost(null);
+  };
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <div className="flex h-screen overflow-hidden">
-        {/* Sidebar */}
-        <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-          {/* Header */}
-          <div className="h-16 flex items-center justify-between px-6 border-b border-slate-200">
-            <h2 className="text-xl font-bold text-slate-900">Админ панель</h2>
-            <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-2 rounded-lg hover:bg-slate-100">
-              <X className="w-5 h-5" />
-            </button>
+    <>
+    <div className="py-8 lg:py-12">
+      <div className="container mx-auto px-4 lg:px-8">
+        <div className="bg-white rounded-3xl shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200 p-6">
+            <h1 className="text-3xl font-bold text-slate-900">Админ панель</h1>
+            <p className="text-slate-600 mt-2">Управление контентом и настройками сайта</p>
           </div>
 
-          {/* Navigation */}
-          <nav className="p-4 space-y-2">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setActiveTab(item.id);
-                    setSidebarOpen(false);
-                  }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                    isActive
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : 'text-slate-700 hover:bg-slate-100'
-                  }`}
+          <div className="flex flex-row min-h-[600px]">
+            {/* Sidebar */}
+            <div className="w-64 bg-slate-50 border-r border-slate-200 p-4 flex-shrink-0">
+              <nav className="flex flex-col gap-2">
+                <a
+                  href="/admin"
+                  className={
+                    activeTab === 'dashboard' 
+                      ? 'w-full px-4 py-3 rounded-xl flex items-center gap-3 transition-colors bg-slate-200 text-slate-900 font-medium' 
+                      : 'w-full px-4 py-3 rounded-xl flex items-center gap-3 transition-colors text-slate-700 hover:bg-slate-200'
+                  }
                 >
-                  <Icon className="w-5 h-5 flex-shrink-0" />
-                  <span className="font-medium text-left">{item.name}</span>
-                </button>
-              );
-            })}
-          </nav>
+                  <LayoutDashboard size={20} />
+                  <span>Обзор</span>
+                </a>
+                <a
+                  href="/admin/pages"
+                  className={
+                    activeTab === 'pages' 
+                      ? 'w-full px-4 py-3 rounded-xl flex items-center gap-3 transition-colors bg-slate-200 text-slate-900 font-medium' 
+                      : 'w-full px-4 py-3 rounded-xl flex items-center gap-3 transition-colors text-slate-700 hover:bg-slate-200'
+                  }
+                >
+                  <FileText size={20} />
+                  <span>Страницы</span>
+                </a>
+                <a
+                  href="/admin/posts"
+                  className={
+                    activeTab === 'posts' 
+                      ? 'w-full px-4 py-3 rounded-xl flex items-center gap-3 transition-colors bg-slate-200 text-slate-900 font-medium' 
+                      : 'w-full px-4 py-3 rounded-xl flex items-center gap-3 transition-colors text-slate-700 hover:bg-slate-200'
+                  }
+                >
+                  <Newspaper size={20} />
+                  <span>Статьи</span>
+                </a>
+                <a
+                  href="/admin/analytics"
+                  className={
+                    activeTab === 'analytics' 
+                      ? 'w-full px-4 py-3 rounded-xl flex items-center gap-3 transition-colors bg-slate-200 text-slate-900 font-medium' 
+                      : 'w-full px-4 py-3 rounded-xl flex items-center gap-3 transition-colors text-slate-700 hover:bg-slate-200'
+                  }
+                >
+                  <BarChart3 size={20} />
+                  <span>Метрика</span>
+                </a>
+                <a
+                  href="/admin/seo"
+                  className={
+                    activeTab === 'seo' 
+                      ? 'w-full px-4 py-3 rounded-xl flex items-center gap-3 transition-colors bg-slate-200 text-slate-900 font-medium' 
+                      : 'w-full px-4 py-3 rounded-xl flex items-center gap-3 transition-colors text-slate-700 hover:bg-slate-200'
+                  }
+                >
+                  <Search size={20} />
+                  <span>SEO</span>
+                </a>
+                <a
+                  href="/admin/settings"
+                  className={
+                    activeTab === 'settings' 
+                      ? 'w-full px-4 py-3 rounded-xl flex items-center gap-3 transition-colors bg-slate-200 text-slate-900 font-medium' 
+                      : 'w-full px-4 py-3 rounded-xl flex items-center gap-3 transition-colors text-slate-700 hover:bg-slate-200'
+                  }
+                >
+                  <Settings size={20} />
+                  <span>Настройки</span>
+                </a>
+              </nav>
+            </div>
 
-          {/* Stats Widget */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200">
-            <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="w-4 h-4 text-purple-600" />
-                <span className="text-xs font-semibold text-purple-900">Статистика</span>
-              </div>
-              <p className="text-2xl font-bold text-purple-600">1.2k</p>
-              <p className="text-xs text-purple-700">просмотров сегодня</p>
+            {/* Main Content */}
+            <div className="flex-1 p-6 lg:p-8">
+              {activeTab === 'dashboard' && (
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-bold text-slate-900">Обзор и статистика</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6">
+                      <p className="text-slate-600 text-sm mb-2">Всего статей</p>
+                      <p className="text-3xl font-bold text-blue-600">10</p>
+                    </div>
+                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6">
+                      <p className="text-slate-600 text-sm mb-2">Опубликовано</p>
+                      <p className="text-3xl font-bold text-green-600">8</p>
+                    </div>
+                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6">
+                      <p className="text-slate-600 text-sm mb-2">Черновики</p>
+                      <p className="text-3xl font-bold text-yellow-600">2</p>
+                    </div>
+                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6">
+                      <p className="text-slate-600 text-sm mb-2">Просмотры</p>
+                      <p className="text-3xl font-bold text-purple-600">1.2k</p>
+                    </div>
+                  </div>
+                  <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
+                    <h3 className="text-lg font-bold text-blue-900 mb-2">💡 Быстрый старт</h3>
+                    <p className="text-blue-700 mb-4">
+                      Для редактирования контента измените файлы в src/data/posts.ts
+                    </p>
+                    <div className="space-y-2 text-sm text-blue-800">
+                      <p>• Добавьте новые статьи в массив POSTS</p>
+                      <p>• Загрузите изображения в public/images/</p>
+                      <p>• Закоммитьте изменения: git push origin2</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {activeTab === 'pages' && (
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-bold text-slate-900">Управление страницами</h2>
+                  <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
+                    <p className="text-blue-800 text-sm">
+                      Здесь будет управление статическими страницами сайта
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              {activeTab === 'posts' && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-slate-900">Управление статьями</h2>
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm text-slate-500">Всего: {posts.length}</span>
+                      <a
+                        href="/admin/posts/new"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                      >
+                        + Создать статью
+                      </a>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-slate-50 border-b border-slate-200">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Название</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Категория</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Дата</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Просмотры</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Лайки</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Статус</th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Действия</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-200">
+                          {posts.map((post) => (
+                            <tr key={post.id} className="hover:bg-slate-50 transition-colors">
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-3">
+                                  <img src={post.coverImage} alt={post.title} className="w-12 h-12 rounded-lg object-cover" />
+                                  <div>
+                                    <p className="font-medium text-slate-900">{post.title}</p>
+                                    <p className="text-sm text-slate-500">{post.readTime}</p>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4">
+                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${post.category.color}`}>
+                                  {post.category.name}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 text-sm text-slate-600">{post.date}</td>
+                              <td className="px-6 py-4 text-sm text-slate-600">{post.views}</td>
+                              <td className="px-6 py-4 text-sm text-slate-600">{post.likes}</td>
+                              <td className="px-6 py-4">
+                                <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                                  Опубликовано
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                <a
+                                  href={`/admin/posts/${post.id}/edit`}
+                                  className="inline-flex items-center gap-2 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium border border-blue-300"
+                                  title="Редактировать статью"
+                                >
+                                  <Edit size={16} className="text-blue-700" />
+                                  <span className="text-blue-700">Редактировать</span>
+                                </a>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
+                    <p className="text-blue-800 text-sm">
+                      <strong>Примечание:</strong> Для редактирования статей измените файл src/data/posts.ts
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              {activeTab === 'analytics' && (
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-bold text-slate-900">Настройка метрики</h2>
+                  <div className="bg-purple-50 border border-purple-200 rounded-2xl p-6">
+                    <p className="text-purple-800 text-sm">
+                      Здесь будут настройки Яндекс.Метрики и Google Analytics
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              {activeTab === 'seo' && (
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-bold text-slate-900">SEO настройки</h2>
+                  <div className="bg-green-50 border border-green-200 rounded-2xl p-6">
+                    <p className="text-green-800 text-sm">
+                      Здесь будут настройки SEO: мета-теги, Open Graph, sitemap, robots.txt
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              {activeTab === 'settings' && (
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-bold text-slate-900">Настройки сайта</h2>
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-900 mb-2">Деплой</h3>
+                      <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                        <div>
+                          <p className="font-medium text-slate-900">GitHub Pages</p>
+                          <p className="text-sm text-slate-500">https://antondvinyaninov.github.io/</p>
+                        </div>
+                        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                          Активен
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-900 mb-2">Версия</h3>
+                      <span className="px-4 py-2 bg-purple-100 text-purple-700 rounded-xl font-mono font-bold">
+                        v1.0.0
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        </aside>
-
-        {/* Overlay for mobile */}
-        {sidebarOpen && (
-          <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/50 z-40 lg:hidden"></div>
-        )}
-
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Top Bar */}
-          <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6">
-            <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-slate-100">
-              <Menu className="w-6 h-6" />
-            </button>
-            <div className="flex items-center gap-4">
-              <div className="hidden lg:block">
-                <h1 className="text-2xl font-bold text-slate-900">
-                  {menuItems.find(item => item.id === activeTab)?.name}
-                </h1>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                ● Онлайн
-              </span>
-            </div>
-          </header>
-
-          {/* Content Area */}
-          <main className="flex-1 overflow-y-auto p-6">
-            <div className="max-w-7xl mx-auto">
-              {activeTab === 'dashboard' && <DashboardContent />}
-              {activeTab === 'posts' && <PostsContent />}
-              {activeTab === 'pages' && <PagesContent />}
-              {activeTab === 'media' && <MediaContent />}
-              {activeTab === 'settings' && <SettingsContent />}
-            </div>
-          </main>
         </div>
       </div>
     </div>
-  );
-}
-
-function DashboardContent() {
-  const stats = [
-    { label: 'Всего статей', value: '10', color: 'from-blue-500 to-blue-600', icon: FileText },
-    { label: 'Опубликовано', value: '8', color: 'from-green-500 to-green-600', icon: TrendingUp },
-    { label: 'Черновики', value: '2', color: 'from-yellow-500 to-yellow-600', icon: FileText },
-    { label: 'Просмотры', value: '1.2k', color: 'from-purple-500 to-purple-600', icon: Users },
-  ];
-
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div key={stat.label} className={`bg-gradient-to-br ${stat.color} rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow`}>
-              <div className="flex items-center justify-between mb-4">
-                <Icon className="w-8 h-8 opacity-80" />
-              </div>
-              <p className="text-white/80 text-sm mb-1">{stat.label}</p>
-              <p className="text-4xl font-bold">{stat.value}</p>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="bg-white border border-blue-200 rounded-2xl p-6 shadow-sm">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-            <span className="text-2xl">💡</span>
-          </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-bold text-slate-900 mb-2">Быстрый старт</h3>
-            <p className="text-slate-600 mb-4">
-              Для редактирования контента измените файлы в <code className="bg-slate-100 px-2 py-1 rounded text-sm">src/data/posts.ts</code>
-            </p>
-            <div className="space-y-2 text-sm text-slate-700">
-              <div className="flex items-center gap-2">
-                <span className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold">1</span>
-                <p>Добавьте новые статьи в массив POSTS</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold">2</span>
-                <p>Загрузите изображения в public/images/</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold">3</span>
-                <p>Закоммитьте изменения: <code className="bg-slate-100 px-2 py-1 rounded">git push origin2</code></p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PostsContent() {
-  return (
-    <div className="space-y-6">
-      <div className="bg-white border border-yellow-200 rounded-2xl p-6 shadow-sm">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center flex-shrink-0">
-            <FileText className="w-6 h-6 text-yellow-600" />
-          </div>
-          <div>
-            <h3 className="font-bold text-slate-900 mb-2">Редактирование статей</h3>
-            <p className="text-slate-700 text-sm mb-3">
-              Для редактирования статей измените файл <code className="bg-yellow-100 px-2 py-1 rounded text-sm">src/data/posts.ts</code>
-            </p>
-            <a href="https://github.com/antondvinyaninov/antondvinyaninov.github.io/blob/main/src/data/posts.ts" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-xl hover:bg-yellow-700 transition-colors text-sm font-medium">
-              Открыть на GitHub
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PagesContent() {
-  const pages = [
-    { name: 'Главная', path: '/', status: 'active' },
-    { name: 'Блог', path: '/blog', status: 'active' },
-    { name: 'Админка', path: '/admin', status: 'active' },
-  ];
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {pages.map((page) => (
-        <div key={page.path} className="bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg transition-shadow">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h3 className="text-lg font-bold text-slate-900">{page.name}</h3>
-              <p className="text-sm text-slate-500">{page.path}</p>
-            </div>
-            <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-              Активна
-            </span>
-          </div>
-          <a href={page.path} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium">
-            Открыть →
-          </a>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function MediaContent() {
-  return (
-    <div className="bg-white border-2 border-dashed border-slate-300 rounded-2xl p-12 text-center">
-      <Image className="w-16 h-16 mx-auto text-slate-400 mb-4" />
-      <h3 className="text-lg font-semibold text-slate-700 mb-2">Загрузите изображения</h3>
-      <p className="text-slate-500 mb-4">Добавьте файлы в папку public/images/</p>
-      <code className="inline-block bg-slate-100 px-4 py-2 rounded-lg text-sm text-slate-700">
-        public/images/your-image.jpg
-      </code>
-    </div>
-  );
-}
-
-function SettingsContent() {
-  return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Деплой</h3>
-        <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
-          <div>
-            <p className="font-medium text-slate-900">GitHub Pages</p>
-            <a href="https://antondvinyaninov.github.io/" target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-700">
-              https://antondvinyaninov.github.io/
-            </a>
-          </div>
-          <span className="px-3 py-1 bg-green-500 text-white rounded-full text-xs font-medium shadow-sm">
-            ● Активен
-          </span>
-        </div>
-      </div>
-
-      <hr className="border-slate-200" />
-
-      <div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Версия</h3>
-        <div className="flex items-center gap-4">
-          <span className="px-4 py-2 bg-gradient-to-r from-purple-100 to-purple-200 text-purple-700 rounded-xl font-mono font-bold text-lg">
-            v1.0.0
-          </span>
-          <a href="https://github.com/antondvinyaninov/antondvinyaninov.github.io" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-            Посмотреть на GitHub →
-          </a>
-        </div>
-      </div>
-    </div>
+    
+    {editingPost && (
+      <>
+        {console.log('Rendering PostEditor for:', editingPost)}
+        <PostEditor
+          post={editingPost}
+          onClose={() => setEditingPost(null)}
+          onSave={handleSavePost}
+        />
+      </>
+    )}
+    </>
   );
 }

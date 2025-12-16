@@ -3,6 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import AdminPanel from '../components/AdminPanel.tsx';
 ---
 
-<BaseLayout title="Админ панель">
-  <AdminPanel client:load />
+<BaseLayout title="Обзор | Админ панель">
+  <AdminPanel client:load activeTab="dashboard" />
 </BaseLayout>

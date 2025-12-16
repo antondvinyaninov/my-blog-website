@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Image as ImageIcon, Check, Loader2, ArrowLeft, Settings, Globe, ChevronDown, ChevronUp, Calendar } from 'lucide-react';
 import RichTextEditor from './RichTextEditor';
 
@@ -40,6 +40,51 @@ export default function SubmissionForm() {
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+    const [isLoading, setIsLoading] = useState(false);
+    const [editId, setEditId] = useState<string | null>(null);
+
+    // Load post data if editing
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        
+        // Проверяем URL: /admin/posts/[id]/edit
+        const path = window.location.pathname;
+        const editMatch = path.match(/\/admin\/posts\/(\d+)\/edit/);
+        
+        if (editMatch) {
+            const id = editMatch[1];
+            setEditId(id);
+            setIsLoading(true);
+            // Загружаем данные поста
+            fetch(`/api/posts/${id}.json`)
+                .then(res => {
+                    console.log('API Response status:', res.status);
+                    return res.json();
+                })
+                .then(post => {
+                    console.log('Loaded post:', post);
+                    setFormData({
+                        title: post.title || '',
+                        excerpt: post.excerpt || '',
+                        tags: post.tags || [],
+                        coverImage: post.coverImage || null,
+                        content: post.content || `<p>${post.excerpt || 'Start writing your amazing story...'}</p>`,
+                        slug: post.slug || '',
+                        metaTitle: post.metaTitle || post.title || '',
+                        metaDescription: post.metaDescription || post.excerpt || '',
+                        status: post.status || 'published',
+                        category: post.category?.name || 'Uncategorized',
+                        publishDate: post.publishDate || new Date().toISOString().split('T')[0],
+                        featured: post.featured || false,
+                    });
+                })
+                .catch(err => {
+                    console.error('Error loading post:', err);
+                    alert('Ошибка загрузки статьи');
+                })
+                .finally(() => setIsLoading(false));
+        }
+    }, []);
 
     // Accordion states
     const [sections, setSections] = useState({
@@ -94,28 +139,42 @@ export default function SubmissionForm() {
         }
     };
 
+    if (isLoading) {
+        return (
+            <div className="max-w-2xl mx-auto py-24 text-center">
+                <Loader2 className="w-12 h-12 animate-spin text-slate-400 mx-auto mb-4" />
+                <p className="text-slate-500">Загрузка статьи...</p>
+            </div>
+        );
+    }
+
     if (status === 'success') {
         return (
             <div className="max-w-2xl mx-auto py-24 text-center">
                 <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Check className="w-8 h-8" />
                 </div>
-                <h2 className="text-3xl font-bold text-slate-900 mb-4">Статья отправлена!</h2>
+                <h2 className="text-3xl font-bold text-slate-900 mb-4">
+                    {editId ? 'Статья обновлена!' : 'Статья отправлена!'}
+                </h2>
                 <p className="text-slate-500 mb-8">
-                    Ваша статья была успешно отправлена на модерацию.
+                    {editId 
+                        ? 'Изменения успешно сохранены.' 
+                        : 'Ваша статья была успешно отправлена на модерацию.'
+                    }
                 </p>
-                <button
-                    onClick={() => setStatus('idle')}
-                    className="px-6 py-2 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 transition-colors"
+                <a
+                    href="/admin"
+                    className="inline-block px-6 py-2 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 transition-colors"
                 >
-                    Отправить еще одну
-                </button>
+                    Вернуться в админку
+                </a>
             </div>
         );
     }
 
     return (
-        <form onSubmit={handleSubmit} className="max-w-6xl mx-auto">
+        <form onSubmit={handleSubmit} className="w-full">
             {/* Header Actions */}
             <div className="flex items-center justify-between pb-6 mb-8 border-b border-slate-100">
                 <a href="/" className="text-slate-500 hover:text-slate-900 flex items-center gap-2 text-sm font-medium">
@@ -131,14 +190,17 @@ export default function SubmissionForm() {
                         className="flex items-center gap-2 px-6 py-2.5 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-slate-900/20"
                     >
                         {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                        {isSubmitting ? 'Публикация...' : 'Опубликовать'}
+                        {isSubmitting 
+                            ? (editId ? 'Сохранение...' : 'Публикация...') 
+                            : (editId ? 'Сохранить изменения' : 'Опубликовать')
+                        }
                     </button>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 {/* Left Column: Main Content */}
-                <div className="lg:col-span-2 space-y-6">
+                <div className="lg:col-span-3 space-y-6">
                     <div>
                         <input
                             type="text"

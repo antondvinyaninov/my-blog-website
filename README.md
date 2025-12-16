@@ -6,6 +6,7 @@
 
 ## ✨ Возможности
 
+### Фронтенд
 - 🎨 Современный и чистый дизайн
 - 📱 Полностью адаптивная верстка
 - 🚀 Быстрая загрузка благодаря Astro
@@ -15,7 +16,19 @@
 - 💬 Лайки и комментарии на статьях
 - 🏷️ Категории статей с цветными бейджами
 - 🔖 Функция закладок
+
+### Админ-панель
+- 🎛️ Полноценная админ-панель для управления контентом
+- 📊 Обзор и статистика (статьи, просмотры, лайки)
+- ✏️ Rich text редактор для создания и редактирования статей
+- 📝 Управление статьями с таблицей и фильтрацией
+- 🔗 RESTful URL структура (`/admin/posts/[id]/edit`)
+- 🎨 Пастельный дизайн с боковой навигацией
+- 📱 Адаптивная верстка админки
+
+### Деплой
 - ⚡ Автоматический деплой на GitHub Pages
+- 🔄 CI/CD через GitHub Actions
 
 ## 🚀 Структура проекта
 
@@ -25,6 +38,9 @@
 │   └── images/              # Изображения статей и иллюстрации
 ├── src/
 │   ├── components/          # Компоненты Astro и React
+│   │   ├── AdminPanel.tsx   # Админ-панель
+│   │   ├── SubmissionForm.tsx # Форма создания/редактирования
+│   │   ├── RichTextEditor.tsx # Rich text редактор
 │   │   ├── FeaturedArticleCard.astro
 │   │   ├── CompactArticleCard.astro
 │   │   ├── VideoCard.astro
@@ -36,7 +52,22 @@
 │   ├── layouts/
 │   │   └── BaseLayout.astro # Базовый layout
 │   ├── pages/
-│   │   └── index.astro      # Главная страница
+│   │   ├── index.astro      # Главная страница
+│   │   ├── admin.astro      # Админ-панель (обзор)
+│   │   ├── admin/
+│   │   │   ├── posts.astro  # Список статей
+│   │   │   ├── posts/
+│   │   │   │   ├── new.astro # Создание статьи
+│   │   │   │   └── [id]/
+│   │   │   │       └── edit.astro # Редактирование
+│   │   │   ├── pages.astro
+│   │   │   ├── analytics.astro
+│   │   │   ├── seo.astro
+│   │   │   └── settings.astro
+│   │   └── api/
+│   │       ├── posts.json.ts # API для статей
+│   │       └── posts/
+│   │           └── [id].json.ts # API для одной статьи
 │   └── styles/
 │       └── global.css       # Глобальные стили
 ├── .github/
@@ -137,11 +168,48 @@ gh run list --repo antondvinyaninov/antondvinyaninov.github.io --limit 1
 
 Или перейдите во вкладку **Actions** на GitHub.
 
+## �️ еАдмин-панель
+
+Доступ к админ-панели: [https://antondvinyaninov.github.io/admin](https://antondvinyaninov.github.io/admin)
+
+### Возможности:
+
+- **Обзор** (`/admin`) - статистика и быстрый старт
+- **Статьи** (`/admin/posts`) - таблица всех статей с возможностью редактирования
+- **Создание** (`/admin/posts/new`) - форма создания новой статьи
+- **Редактирование** (`/admin/posts/[id]/edit`) - редактор с rich text
+- **Страницы** (`/admin/pages`) - управление статическими страницами
+- **Метрика** (`/admin/analytics`) - настройка аналитики
+- **SEO** (`/admin/seo`) - SEO настройки
+- **Настройки** (`/admin/settings`) - общие настройки сайта
+
+### Rich Text Редактор:
+
+- Форматирование текста (жирный, курсив, подчеркнутый, зачеркнутый)
+- Заголовки (H1-H6)
+- Списки (маркированные, нумерованные)
+- Цитаты и код блоки
+- Ссылки и изображения
+- Выравнивание текста
+- Надстрочный и подстрочный текст
+
+### Редактирование контента:
+
+Для редактирования статей измените файл `src/data/posts.ts` и закоммитьте изменения:
+
+```bash
+# Отредактируйте src/data/posts.ts
+git add src/data/posts.ts
+git commit -m "Обновление статей"
+git push origin2
+```
+
 ## 🎨 Технологии
 
 - [Astro](https://astro.build/) - Фреймворк для статических сайтов
 - [React](https://react.dev/) - Для интерактивных компонентов
 - [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS фреймворк
+- [TipTap](https://tiptap.dev/) - Rich text редактор
 - [Lucide React](https://lucide.dev/) - Иконки
 - [GitHub Pages](https://pages.github.com/) - Хостинг
 
