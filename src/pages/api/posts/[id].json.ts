@@ -1,8 +1,6 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { POSTS } from '../../../data/posts';
 
-export const prerender = false;
-
 export const getStaticPaths: GetStaticPaths = () => {
   return POSTS.map(post => ({
     params: { id: post.id }

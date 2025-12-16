@@ -3,8 +3,6 @@ import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import SubmissionForm from '../../../../components/SubmissionForm';
 import { POSTS } from '../../../../data/posts';
 
-export const prerender = false;
-
 export function getStaticPaths() {
   return POSTS.map(post => ({
     params: { id: post.id }
