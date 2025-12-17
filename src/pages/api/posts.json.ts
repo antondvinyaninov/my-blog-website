@@ -1,10 +1,11 @@
 import type { APIRoute } from 'astro';
-import { POSTS } from '../../data/posts';
+import { getPosts } from '../../utils/posts-manager';
 import fs from 'fs';
 import path from 'path';
 
 export const GET: APIRoute = async () => {
-  return new Response(JSON.stringify(POSTS), {
+  const posts = getPosts();
+  return new Response(JSON.stringify(posts), {
     status: 200,
     headers: {
       'Content-Type': 'application/json'

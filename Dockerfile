@@ -24,6 +24,9 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/src ./src
 COPY package*.json ./
 
+# Создаем директорию для данных с правами на запись
+RUN mkdir -p /app/data && chmod 777 /app/data
+
 EXPOSE 4321
 
 CMD ["node", "./dist/server/entry.mjs"]
