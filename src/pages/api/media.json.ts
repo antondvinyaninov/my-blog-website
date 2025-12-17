@@ -5,6 +5,17 @@ import path from 'path';
 export const GET: APIRoute = async () => {
   try {
     const imagesDir = path.join(process.cwd(), 'public', 'images');
+    
+    // Проверяем существование директории
+    if (!fs.existsSync(imagesDir)) {
+      return new Response(JSON.stringify([]), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    }
+    
     const files = fs.readdirSync(imagesDir);
     
     const images = files
@@ -23,8 +34,9 @@ export const GET: APIRoute = async () => {
       }
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Failed to read images' }), {
-      status: 500,
+    console.error('Media API error:', error);
+    return new Response(JSON.stringify([]), {
+      status: 200,
       headers: {
         'Content-Type': 'application/json'
       }
