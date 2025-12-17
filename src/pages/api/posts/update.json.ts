@@ -2,8 +2,6 @@ import type { APIRoute } from 'astro';
 import fs from 'fs';
 import path from 'path';
 
-export const prerender = false;
-
 export const POST: APIRoute = async ({ request }) => {
     try {
         const body = await request.json();
