@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LayoutDashboard, FileText, Newspaper, BarChart3, Search, Settings, Edit, Image } from 'lucide-react';
-import { POSTS } from '../data/posts';
 import PostEditor from './PostEditor';
 import type { Post } from '../consts';
 
@@ -10,7 +9,22 @@ interface AdminPanelProps {
 
 export default function AdminPanel({ activeTab = 'dashboard' }: AdminPanelProps) {
   const [editingPost, setEditingPost] = useState<Post | null>(null);
-  const [posts, setPosts] = useState(POSTS);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Загружаем посты при монтировании
+  useEffect(() => {
+    fetch('/api/posts.json')
+      .then(res => res.json())
+      .then(data => {
+        setPosts(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to load posts:', err);
+        setLoading(false);
+      });
+  }, []);
 
   const handleSavePost = async (updatedPost: Post) => {
     // Обновляем пост в локальном состоянии
@@ -182,7 +196,11 @@ export default function AdminPanel({ activeTab = 'dashboard' }: AdminPanelProps)
                   <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold text-slate-900">Управление статьями</h2>
                     <div className="flex items-center gap-4">
-                      <span className="text-sm text-slate-500">Всего: {posts.length}</span>
+                      {loading ? (
+                        <span className="text-sm text-slate-500">Загрузка...</span>
+                      ) : (
+                        <span className="text-sm text-slate-500">Всего: {posts.length}</span>
+                      )}
                       <a
                         href="/admin/posts/new"
                         className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-medium"

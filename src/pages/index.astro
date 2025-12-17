@@ -5,9 +5,10 @@ import LatestArticlesSection from '../components/LatestArticlesSection.astro';
 import VideoCard from '../components/VideoCard.astro';
 import SectionHeader from '../components/SectionHeader.astro';
 import Newsletter from '../components/Newsletter.astro';
-import { POSTS } from '../data/posts';
+import { getPosts } from '../utils/posts-manager';
 
 // Data queries
+const POSTS = getPosts();
 const heroPosts = POSTS.slice(0, 5); // 1 main + 4 magazine (1 main + 3 side)
 const latestPosts = POSTS.slice(1, 5); // 4 posts for latest articles section
 const videoPosts = POSTS.filter(p => p.type === 'video').slice(0, 3);

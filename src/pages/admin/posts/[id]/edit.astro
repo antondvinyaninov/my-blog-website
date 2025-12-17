@@ -1,9 +1,10 @@
 ---
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import SubmissionForm from '../../../../components/SubmissionForm';
-import { POSTS } from '../../../../data/posts';
+import { getPosts } from '../../../../utils/posts-manager';
 
 export function getStaticPaths() {
+  const POSTS = getPosts();
   return POSTS.map(post => ({
     params: { id: post.id }
   }));

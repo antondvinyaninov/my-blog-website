@@ -1,6 +1,8 @@
 import type { APIRoute } from 'astro';
-import { POSTS } from '../../data/posts';
+import { getPosts } from '../../utils/posts-manager';
 import { AUTHORS } from '../../data/authors';
+
+const POSTS = getPosts();
 
 export const prerender = false;
 

@@ -1,7 +1,8 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
-import { POSTS } from '../../../data/posts';
+import { getPosts } from '../../../utils/posts-manager';
 
 export const getStaticPaths: GetStaticPaths = () => {
+  const POSTS = getPosts();
   return POSTS.map(post => ({
     params: { id: post.id }
   }));
@@ -9,6 +10,7 @@ export const getStaticPaths: GetStaticPaths = () => {
 
 export const GET: APIRoute = async ({ params }) => {
   const { id } = params;
+  const POSTS = getPosts();
   const post = POSTS.find(p => p.id === id);
   
   if (!post) {
