@@ -123,7 +123,7 @@ export default function SubmissionForm() {
             // Если редактируем существующий пост, обновляем его
             if (editId) {
                 const response = await fetch('/api/posts.json', {
-                    method: 'PUT',
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         id: editId,
