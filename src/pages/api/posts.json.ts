@@ -1,10 +1,8 @@
 import type { APIRoute } from 'astro';
-import { getPosts } from '../../utils/posts-manager';
-import fs from 'fs';
-import path from 'path';
+import { getPostsFromSupabase } from '../../utils/posts-supabase';
 
 export const GET: APIRoute = async () => {
-  const posts = getPosts();
+  const posts = await getPostsFromSupabase();
   return new Response(JSON.stringify(posts), {
     status: 200,
     headers: {

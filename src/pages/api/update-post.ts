@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { updatePost } from '../../utils/posts-manager';
+import { updatePostInSupabase } from '../../utils/posts-supabase';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -16,25 +16,26 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Обновляем пост через менеджер
-    const success = updatePost(body.id, {
+    // Обновляем пост в Supabase
+    const success = await updatePostInSupabase(body.id, {
       coverImage: body.coverImage,
       title: body.title,
       excerpt: body.excerpt,
+      content: body.content,
       // Добавьте другие поля по необходимости
     });
 
     if (!success) {
       return new Response(JSON.stringify({
         success: false,
-        message: 'Failed to update post'
+        message: 'Failed to update post in database'
       }), { 
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    console.log('✅ Post updated successfully');
+    console.log('✅ Post updated successfully in Supabase');
 
     return new Response(JSON.stringify({
       success: true,
