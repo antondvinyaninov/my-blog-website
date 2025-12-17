@@ -21,36 +21,28 @@ export const POST: APIRoute = async ({ request }) => {
     const postsFilePath = path.join(process.cwd(), 'src/data/posts.ts');
     let fileContent = fs.readFileSync(postsFilePath, 'utf-8');
 
-    // Находим конкретный пост по ID через регулярное выражение
+    // Находим конкретный пост по ID (многострочный поиск)
     const postRegex = new RegExp(
-      `(\\{[^}]*id:\\s*'${body.id}'[^}]*coverImage:\\s*)'([^']*)'`,
-      'gs'
+      `(id:\\s*'${body.id}'[\\s\\S]*?coverImage:\\s*)'([^']*)'`,
+      'g'
     );
 
     // Проверяем, найден ли пост
-    if (!postRegex.test(fileContent)) {
-      // Пробуем другой формат (с двойными кавычками)
-      const postRegex2 = new RegExp(
-        `(\\{[^}]*id:\\s*'${body.id}'[^}]*coverImage:\\s*)"([^"]*)"`,
-        'gs'
-      );
-      
-      if (!postRegex2.test(fileContent)) {
-        return new Response(JSON.stringify({
-          success: false,
-          message: `Post with id ${body.id} not found`
-        }), { 
-          status: 404,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-      
-      // Заменяем с двойными кавычками
-      fileContent = fileContent.replace(postRegex2, `$1'${body.coverImage}'`);
-    } else {
-      // Заменяем с одинарными кавычками
-      fileContent = fileContent.replace(postRegex, `$1'${body.coverImage}'`);
+    const match = fileContent.match(postRegex);
+    
+    if (!match) {
+      console.error(`❌ Post with id ${body.id} not found in posts.ts`);
+      return new Response(JSON.stringify({
+        success: false,
+        message: `Post with id ${body.id} not found`
+      }), { 
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
+
+    // Заменяем coverImage
+    fileContent = fileContent.replace(postRegex, `$1'${body.coverImage}'`);
 
     // Записываем обратно в файл
     fs.writeFileSync(postsFilePath, fileContent, 'utf-8');
