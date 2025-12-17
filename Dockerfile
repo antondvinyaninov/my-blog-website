@@ -12,16 +12,15 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-# Production image
-FROM base AS runner
-ENV NODE_ENV=production
-ENV HOST=0.0.0.0
-ENV PORT=4321
+# Production image - serve static files
+FROM nginx:alpine AS runner
 
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY package*.json ./
+# Copy built static files to nginx
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-EXPOSE 4321
+# Copy nginx configuration if needed
+# COPY nginx.conf /etc/nginx/nginx.conf
 
-CMD ["npm", "start"]
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

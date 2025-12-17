@@ -7,7 +7,7 @@ import tailwindcss from '@tailwindcss/vite';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://antondvinyaninov.github.io',
-  // Убираем base, так как это главный репозиторий
+  output: 'static', // Static build for deployment
   
   integrations: [react()],
 
