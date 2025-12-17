@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Image as ImageIcon, Check, Loader2, ArrowLeft, Settings, Globe, ChevronDown, ChevronUp, Calendar } from 'lucide-react';
 import RichTextEditor from './RichTextEditor';
+import MediaLibrary from './MediaLibrary';
 
 interface FormData {
     title: string;
@@ -42,6 +43,7 @@ export default function SubmissionForm() {
     const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [isLoading, setIsLoading] = useState(false);
     const [editId, setEditId] = useState<string | null>(null);
+    const [showMediaLibrary, setShowMediaLibrary] = useState(false);
 
     // Load post data if editing
     useEffect(() => {
@@ -57,12 +59,8 @@ export default function SubmissionForm() {
             setIsLoading(true);
             // Загружаем данные поста
             fetch(`/api/posts/${id}.json`)
-                .then(res => {
-                    console.log('API Response status:', res.status);
-                    return res.json();
-                })
+                .then(res => res.json())
                 .then(post => {
-                    console.log('Loaded post:', post);
                     setFormData({
                         title: post.title || '',
                         excerpt: post.excerpt || '',
@@ -122,15 +120,32 @@ export default function SubmissionForm() {
         setStatus('idle');
 
         try {
-            const response = await fetch('/api/submission', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
-            });
+            // Если редактируем существующий пост, обновляем его
+            if (editId) {
+                const response = await fetch('/api/posts/update.json', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: editId,
+                        ...formData
+                    }),
+                });
 
-            if (!response.ok) throw new Error('Submission failed');
+                if (!response.ok) throw new Error('Update failed');
+                
+                setStatus('success');
+            } else {
+                // Создание нового поста (пока через старый API)
+                const response = await fetch('/api/submission', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData),
+                });
 
-            setStatus('success');
+                if (!response.ok) throw new Error('Submission failed');
+
+                setStatus('success');
+            }
         } catch (error) {
             console.error(error);
             setStatus('error');
@@ -155,19 +170,41 @@ export default function SubmissionForm() {
                     <Check className="w-8 h-8" />
                 </div>
                 <h2 className="text-3xl font-bold text-slate-900 mb-4">
-                    {editId ? 'Статья обновлена!' : 'Статья отправлена!'}
+                    {editId ? 'Изменения сохранены!' : 'Данные подготовлены!'}
                 </h2>
-                <p className="text-slate-500 mb-8">
-                    {editId 
-                        ? 'Изменения успешно сохранены.' 
-                        : 'Ваша статья была успешно отправлена на модерацию.'
-                    }
-                </p>
+                {editId ? (
+                    <div className="bg-green-50 border border-green-200 rounded-2xl p-6 mb-8 text-left max-w-xl mx-auto">
+                        <p className="text-green-900 font-semibold mb-3">
+                            ✅ Статья успешно обновлена
+                        </p>
+                        <p className="text-green-800 text-sm mb-3">
+                            Изменения сохранены в файл <code className="bg-green-100 px-1 rounded">src/data/posts.ts</code>
+                        </p>
+                        <p className="text-green-800 text-sm">
+                            Для публикации на сайте выполните: <code className="bg-green-100 px-1 rounded">git push origin2</code>
+                        </p>
+                    </div>
+                ) : (
+                    <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-8 text-left max-w-xl mx-auto">
+                        <p className="text-amber-900 font-semibold mb-3">
+                            ⚠️ Важно: Это статический сайт
+                        </p>
+                        <p className="text-amber-800 text-sm mb-3">
+                            Изменения не сохраняются автоматически. Для сохранения:
+                        </p>
+                        <ol className="text-amber-800 text-sm space-y-2 list-decimal list-inside">
+                            <li>Откройте консоль браузера (F12)</li>
+                            <li>Скопируйте JSON объект из консоли</li>
+                            <li>Обновите файл <code className="bg-amber-100 px-1 rounded">src/data/posts.ts</code></li>
+                            <li>Выполните <code className="bg-amber-100 px-1 rounded">git push origin2</code></li>
+                        </ol>
+                    </div>
+                )}
                 <a
-                    href="/admin"
+                    href="/admin/posts"
                     className="inline-block px-6 py-2 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 transition-colors"
                 >
-                    Вернуться в админку
+                    Вернуться к статьям
                 </a>
             </div>
         );
@@ -177,9 +214,14 @@ export default function SubmissionForm() {
         <form onSubmit={handleSubmit} className="w-full">
             {/* Header Actions */}
             <div className="flex items-center justify-between pb-6 mb-8 border-b border-slate-100">
-                <a href="/" className="text-slate-500 hover:text-slate-900 flex items-center gap-2 text-sm font-medium">
-                    <ArrowLeft className="w-4 h-4" /> На главную
-                </a>
+                <div className="flex items-center gap-4">
+                    <a href="/" className="text-slate-500 hover:text-slate-900 flex items-center gap-2 text-sm font-medium">
+                        <ArrowLeft className="w-4 h-4" /> На главную
+                    </a>
+                    <a href="/admin" className="text-slate-500 hover:text-slate-900 flex items-center gap-2 text-sm font-medium">
+                        В админку
+                    </a>
+                </div>
                 <div className="flex items-center gap-4">
                     <button type="button" className="text-slate-500 hover:text-slate-900 text-sm font-medium px-4">
                         Сохранить черновик
@@ -359,11 +401,37 @@ export default function SubmissionForm() {
                                 {/* Cover Image Tiny */}
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">Обложка</label>
-                                    <div className="border-2 border-dashed border-slate-200 rounded-lg p-4 text-center hover:border-slate-300 bg-slate-50 transition-all cursor-pointer">
-                                        <div className="text-xs text-slate-500">
-                                            {formData.coverImage ? 'Изменить обложку' : 'Загрузить обложку'}
+                                    {formData.coverImage ? (
+                                        <div className="space-y-2">
+                                            <img src={formData.coverImage} alt="Cover" className="w-full h-32 object-cover rounded-lg" />
+                                            <div className="flex gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowMediaLibrary(true)}
+                                                    className="flex-1 px-3 py-2 text-sm border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                                                >
+                                                    Изменить
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setFormData(prev => ({ ...prev, coverImage: null }))}
+                                                    className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                >
+                                                    Удалить
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowMediaLibrary(true)}
+                                            className="w-full border-2 border-dashed border-slate-200 rounded-lg p-4 text-center hover:border-slate-300 bg-slate-50 transition-all"
+                                        >
+                                            <div className="text-xs text-slate-500">
+                                                Выбрать из медиа-библиотеки
+                                            </div>
+                                        </button>
+                                    )}
                                 </div>
 
                                 {/* Category */}
@@ -405,6 +473,14 @@ export default function SubmissionForm() {
 
                 </div>
             </div>
+            
+            {showMediaLibrary && (
+                <MediaLibrary
+                    selectedUrl={formData.coverImage || undefined}
+                    onSelect={(url) => setFormData(prev => ({ ...prev, coverImage: url }))}
+                    onClose={() => setShowMediaLibrary(false)}
+                />
+            )}
         </form>
     );
 }

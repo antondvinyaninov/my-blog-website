@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LayoutDashboard, FileText, Newspaper, BarChart3, Search, Settings, Edit } from 'lucide-react';
+import { LayoutDashboard, FileText, Newspaper, BarChart3, Search, Settings, Edit, Image } from 'lucide-react';
 import { POSTS } from '../data/posts';
 import PostEditor from './PostEditor';
 import type { Post } from '../consts';
@@ -94,6 +94,17 @@ export default function AdminPanel({ activeTab = 'dashboard' }: AdminPanelProps)
                   <span>Метрика</span>
                 </a>
                 <a
+                  href="/admin/media"
+                  className={
+                    activeTab === 'media' 
+                      ? 'w-full px-4 py-3 rounded-xl flex items-center gap-3 transition-colors bg-slate-200 text-slate-900 font-medium' 
+                      : 'w-full px-4 py-3 rounded-xl flex items-center gap-3 transition-colors text-slate-700 hover:bg-slate-200'
+                  }
+                >
+                  <Image size={20} />
+                  <span>Медиа</span>
+                </a>
+                <a
                   href="/admin/seo"
                   className={
                     activeTab === 'seo' 
@@ -126,7 +137,7 @@ export default function AdminPanel({ activeTab = 'dashboard' }: AdminPanelProps)
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6">
                       <p className="text-slate-600 text-sm mb-2">Всего статей</p>
-                      <p className="text-3xl font-bold text-blue-600">10</p>
+                      <p className="text-3xl font-bold text-slate-700">10</p>
                     </div>
                     <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6">
                       <p className="text-slate-600 text-sm mb-2">Опубликовано</p>
@@ -141,12 +152,12 @@ export default function AdminPanel({ activeTab = 'dashboard' }: AdminPanelProps)
                       <p className="text-3xl font-bold text-purple-600">1.2k</p>
                     </div>
                   </div>
-                  <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
-                    <h3 className="text-lg font-bold text-blue-900 mb-2">💡 Быстрый старт</h3>
-                    <p className="text-blue-700 mb-4">
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
+                    <h3 className="text-lg font-bold text-amber-900 mb-2">💡 Быстрый старт</h3>
+                    <p className="text-amber-800 mb-4">
                       Для редактирования контента измените файлы в src/data/posts.ts
                     </p>
-                    <div className="space-y-2 text-sm text-blue-800">
+                    <div className="space-y-2 text-sm text-amber-800">
                       <p>• Добавьте новые статьи в массив POSTS</p>
                       <p>• Загрузите изображения в public/images/</p>
                       <p>• Закоммитьте изменения: git push origin2</p>
@@ -158,8 +169,8 @@ export default function AdminPanel({ activeTab = 'dashboard' }: AdminPanelProps)
               {activeTab === 'pages' && (
                 <div className="space-y-6">
                   <h2 className="text-2xl font-bold text-slate-900">Управление страницами</h2>
-                  <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
-                    <p className="text-blue-800 text-sm">
+                  <div className="bg-sky-50 border border-sky-200 rounded-2xl p-6">
+                    <p className="text-sky-800 text-sm">
                       Здесь будет управление статическими страницами сайта
                     </p>
                   </div>
@@ -174,7 +185,7 @@ export default function AdminPanel({ activeTab = 'dashboard' }: AdminPanelProps)
                       <span className="text-sm text-slate-500">Всего: {posts.length}</span>
                       <a
                         href="/admin/posts/new"
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-medium"
                       >
                         + Создать статью
                       </a>
@@ -223,11 +234,11 @@ export default function AdminPanel({ activeTab = 'dashboard' }: AdminPanelProps)
                               <td className="px-6 py-4 text-right">
                                 <a
                                   href={`/admin/posts/${post.id}/edit`}
-                                  className="inline-flex items-center gap-2 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium border border-blue-300"
+                                  className="inline-flex items-center gap-2 px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-sm font-medium border border-slate-300"
                                   title="Редактировать статью"
                                 >
-                                  <Edit size={16} className="text-blue-700" />
-                                  <span className="text-blue-700">Редактировать</span>
+                                  <Edit size={16} className="text-slate-700" />
+                                  <span className="text-slate-700">Редактировать</span>
                                 </a>
                               </td>
                             </tr>
@@ -237,9 +248,45 @@ export default function AdminPanel({ activeTab = 'dashboard' }: AdminPanelProps)
                     </div>
                   </div>
                   
-                  <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
-                    <p className="text-blue-800 text-sm">
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+                    <p className="text-amber-800 text-sm">
                       <strong>Примечание:</strong> Для редактирования статей измените файл src/data/posts.ts
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              {activeTab === 'media' && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-slate-900">Медиа библиотека</h2>
+                    <button className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-medium">
+                      + Загрузить изображение
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {/* Пример изображений из public/images */}
+                    {[
+                      '/images/hero_pool.png',
+                      '/images/hero_pool.jpg',
+                      '/images/post_interior.png',
+                      '/images/newsletter-illustration.png'
+                    ].map((img, idx) => (
+                      <div key={idx} className="group relative aspect-square rounded-lg overflow-hidden border border-slate-200 hover:border-slate-400 transition-colors cursor-pointer">
+                        <img src={img} alt="" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-opacity flex items-center justify-center">
+                          <button className="opacity-0 group-hover:opacity-100 px-3 py-1 bg-white text-slate-900 rounded text-sm font-medium">
+                            Выбрать
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+                    <p className="text-amber-800 text-sm">
+                      <strong>Примечание:</strong> Изображения хранятся в папке public/images/
                     </p>
                   </div>
                 </div>
@@ -285,7 +332,7 @@ export default function AdminPanel({ activeTab = 'dashboard' }: AdminPanelProps)
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold text-slate-900 mb-2">Версия</h3>
-                      <span className="px-4 py-2 bg-purple-100 text-purple-700 rounded-xl font-mono font-bold">
+                      <span className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-mono font-bold">
                         v1.0.0
                       </span>
                     </div>

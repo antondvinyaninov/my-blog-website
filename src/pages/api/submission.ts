@@ -2,13 +2,37 @@ import type { APIRoute } from 'astro';
 import { POSTS } from '../../data/posts';
 import { AUTHORS } from '../../data/authors';
 
+export const prerender = false;
+
 export const POST: APIRoute = async ({ request }) => {
-    const body = await request.json();
+    let body;
+    
+    try {
+        const text = await request.text();
+        console.log('📥 Received request body:', text);
+        
+        if (!text) {
+            console.error('❌ Empty request body');
+            return new Response(JSON.stringify({
+                message: 'Empty request body'
+            }), { status: 400 });
+        }
+        body = JSON.parse(text);
+        console.log('✅ Parsed body:', body);
+    } catch (error) {
+        console.error('❌ JSON parse error:', error);
+        return new Response(JSON.stringify({
+            message: 'Invalid JSON',
+            error: String(error)
+        }), { status: 400 });
+    }
 
     // Validate basic data
-    if (!body.title || !body.content) {
+    if (!body.title) {
+        console.error('❌ Missing title. Body keys:', Object.keys(body));
         return new Response(JSON.stringify({
-            message: 'Missing required fields'
+            message: 'Missing required fields: title is required',
+            receivedKeys: Object.keys(body)
         }), { status: 400 });
     }
 
@@ -16,29 +40,52 @@ export const POST: APIRoute = async ({ request }) => {
     const newPost = {
         id: (POSTS.length + 1).toString(),
         title: body.title,
-        slug: body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
-        excerpt: body.excerpt || body.content.substring(0, 150) + '...',
-        content: body.content,
+        slug: body.slug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
+        excerpt: body.excerpt || '',
+        content: body.content || '',
         tags: body.tags || [],
-        coverImage: body.coverImage || 'https://images.unsplash.com/photo-1499750310159-5b9887039e54?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', // Default image
-        category: { id: 'uncategorized', name: 'Uncategorized', color: 'bg-slate-100 text-slate-800' },
-        author: AUTHORS[0], // Assigned to current user (mock)
-        date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
-        readTime: '3 min read', // Mock calculation
+        coverImage: body.coverImage || '/images/hero_pool.png',
+        category: body.category ? { 
+            id: body.category.toLowerCase(), 
+            name: body.category, 
+            color: 'bg-slate-100 text-slate-800' 
+        } : { 
+            id: 'uncategorized', 
+            name: 'Uncategorized', 
+            color: 'bg-slate-100 text-slate-800' 
+        },
+        author: AUTHORS[0],
+        date: body.publishDate ? new Date(body.publishDate).toLocaleDateString('ru-RU', { 
+            month: 'long', 
+            day: 'numeric', 
+            year: 'numeric' 
+        }) : new Date().toLocaleDateString('ru-RU', { 
+            month: 'long', 
+            day: 'numeric', 
+            year: 'numeric' 
+        }),
+        readTime: '3 min read',
         views: 0,
+        likes: 0,
+        comments: 0,
         type: 'standard' as const,
+        status: body.status || 'draft',
+        featured: body.featured || false,
+        metaTitle: body.metaTitle || body.title,
+        metaDescription: body.metaDescription || body.excerpt,
     };
 
     // Logic to save data.
-    // NOTE: In a real app, this would save to a database.
-    // Since we can't easily persist to the file system in a deployed serverless function without an adapter,
-    // we will just log it here for the "preview" capability.
-    console.log('--- NEW SUBMISSION RECEIVED ---');
-    console.log(newPost);
-    console.log('------------------------------');
+    // NOTE: Это статический сайт - данные НЕ сохраняются в файл автоматически!
+    // Для сохранения изменений нужно вручную обновить src/data/posts.ts
+    console.log('--- SUBMISSION RECEIVED ---');
+    console.log('Данные для сохранения в src/data/posts.ts:');
+    console.log(JSON.stringify(newPost, null, 2));
+    console.log('---------------------------');
 
     return new Response(JSON.stringify({
-        message: 'Success!',
-        post: newPost
+        message: 'Данные получены! Для сохранения обновите src/data/posts.ts вручную.',
+        post: newPost,
+        note: 'Это статический сайт - изменения не сохраняются автоматически'
     }), { status: 200 });
 };
