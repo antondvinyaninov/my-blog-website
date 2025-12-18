@@ -1,0 +1,42 @@
+---
+interface Props {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  class?: string;
+  loading?: 'lazy' | 'eager';
+  fetchpriority?: 'high' | 'low' | 'auto';
+  decoding?: 'async' | 'sync' | 'auto';
+}
+
+const {
+  src,
+  alt,
+  width,
+  height,
+  class: className = '',
+  loading = 'lazy',
+  fetchpriority = 'auto',
+  decoding = 'async'
+} = Astro.props;
+
+// Генерируем пути для современных форматов
+const avifSrc = src.replace(/\.(jpg|jpeg|png)$/i, '.avif');
+const webpSrc = src.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+---
+
+<picture>
+  <source srcset={avifSrc} type="image/avif" />
+  <source srcset={webpSrc} type="image/webp" />
+  <img 
+    src={src}
+    alt={alt}
+    width={width}
+    height={height}
+    class={className}
+    loading={loading}
+    fetchpriority={fetchpriority}
+    decoding={decoding}
+  />
+</picture>

@@ -4,6 +4,7 @@ import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
 import node from '@astrojs/node';
+import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
@@ -13,12 +14,48 @@ export default defineConfig({
     mode: 'standalone'
   }),
   
-  integrations: [react()],
+  integrations: [
+    react(),
+    sitemap()
+  ],
 
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    build: {
+      cssMinify: 'lightningcss',
+      minify: 'terser',
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'react-vendor': ['react', 'react-dom'],
+            'editor': ['@tiptap/react', '@tiptap/starter-kit'],
+            'supabase': ['@supabase/supabase-js']
+          }
+        }
+      }
+    },
+    ssr: {
+      noExternal: ['@astrojs/react']
+    }
   },
+  
+  image: {
+    domains: ['antondvinyaninov.github.io'],
+    remotePatterns: [{ protocol: 'https' }]
+  },
+  
   server: {
     port: 4321
+  },
+  
+  compressHTML: true,
+  
+  build: {
+    inlineStylesheets: 'auto',
+    assets: '_astro'
+  },
+  
+  experimental: {
+    clientPrerender: true
   }
 });

@@ -10,6 +10,11 @@ RUN npm ci
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Оптимизация изображений перед сборкой
+RUN npm run optimize:images || true
+
+# Сборка приложения
 RUN npm run build
 
 # Production image

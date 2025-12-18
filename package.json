@@ -12,9 +12,13 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "build:check": "astro check && astro build",
+    "build:prod": "NODE_ENV=production astro build",
     "preview": "astro preview",
     "start": "node ./dist/server/entry.mjs",
-    "astro": "astro"
+    "astro": "astro",
+    "check": "astro check",
+    "optimize:images": "node scripts/optimize-images.js"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.1",
@@ -38,5 +42,12 @@
     "react-dom": "^19.2.1",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.17"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.6",
+    "@astrojs/sitemap": "^3.6.0",
+    "compression": "^1.8.1",
+    "sharp": "^0.34.5",
+    "typescript": "^5.9.3"
   }
 }

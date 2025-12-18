@@ -4,5 +4,5 @@ import AdminPanel from '../components/AdminPanel.tsx';
 ---
 
 <BaseLayout title="Обзор | Админ панель">
-  <AdminPanel client:load activeTab="dashboard" />
+  <AdminPanel client:only="react" activeTab="dashboard" />
 </BaseLayout>
