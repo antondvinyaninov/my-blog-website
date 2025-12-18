@@ -1,14 +1,37 @@
 import type { APIRoute } from 'astro';
 import { getPostsFromSupabase } from '../../utils/posts-supabase';
+import { POSTS } from '../../data/posts';
 
 export const GET: APIRoute = async () => {
-  const posts = await getPostsFromSupabase();
-  return new Response(JSON.stringify(posts), {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/json'
+  try {
+    const posts = await getPostsFromSupabase();
+    
+    // Если в БД нет данных, возвращаем из файла
+    if (posts.length === 0) {
+      console.log('⚠️ No posts in Supabase, using posts.ts');
+      return new Response(JSON.stringify(POSTS), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
     }
-  });
+    
+    return new Response(JSON.stringify(posts), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error fetching from Supabase, falling back to posts.ts:', error);
+    return new Response(JSON.stringify(POSTS), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+  }
 };
 
 export const POST: APIRoute = async ({ request }) => {
