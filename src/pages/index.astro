@@ -22,9 +22,13 @@ try {
 const heroPosts = POSTS.slice(0, 5); // 1 main + 4 magazine (1 main + 3 side)
 const latestPosts = POSTS.slice(1, 5); // 4 posts for latest articles section
 const videoPosts = POSTS.filter(p => p.type === 'video').slice(0, 3);
+
+// Preload hero image
+const heroImage = heroPosts[0]?.coverImage;
 ---
 
 <BaseLayout title="Ncmaz | Будущее медиа">
+  <link slot="head" rel="preload" as="image" href={heroImage} fetchpriority="high" />
   
   <div class="py-8 lg:py-12">
     {/* Hero Overlay Section */}

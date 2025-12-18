@@ -36,6 +36,9 @@ export default defineConfig({
     },
     ssr: {
       noExternal: ['@astrojs/react']
+    },
+    optimizeDeps: {
+      exclude: ['@astrojs/react']
     }
   },
   

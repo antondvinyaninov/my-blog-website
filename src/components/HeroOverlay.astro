@@ -18,10 +18,6 @@ const { post } = Astro.props;
          <div class="relative rounded-[2.5rem] overflow-hidden aspect-[16/10] shadow-2xl">
             <picture>
               <source 
-                srcset={post.coverImage.replace(/\.(jpg|jpeg|png)$/i, '.avif')} 
-                type="image/avif"
-              />
-              <source 
                 srcset={post.coverImage.replace(/\.(jpg|jpeg|png)$/i, '.webp')} 
                 type="image/webp"
               />
@@ -31,7 +27,7 @@ const { post } = Astro.props;
                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 loading="eager"
                 fetchpriority="high"
-                decoding="async"
+                decoding="sync"
                 width="1200"
                 height="750"
               />

@@ -29,15 +29,21 @@ const {
   <!-- Image Section with Category Badge Overlay -->
   <div class="relative aspect-[16/10] overflow-hidden">
     <a href={`/blog/${post.slug}`} class="block w-full h-full cursor-pointer">
-      <img 
-        src={coverImage} 
-        alt={post.title} 
-        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-        loading="lazy"
-        decoding="async"
-        width="640"
-        height="400"
-      />
+      <picture>
+        <source 
+          srcset={coverImage.replace(/\.(jpg|jpeg|png)$/i, '.webp')} 
+          type="image/webp"
+        />
+        <img 
+          src={coverImage} 
+          alt={post.title} 
+          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          loading="lazy"
+          decoding="async"
+          width="640"
+          height="400"
+        />
+      </picture>
     </a>
     
     <!-- Category Badge Overlay -->

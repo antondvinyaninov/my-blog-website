@@ -25,12 +25,8 @@ const { title, description = "A Premium Astro Blog", image = "/placeholder-socia
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     
-    <!-- DNS prefetch for performance -->
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-    
-    <!-- Preload critical fonts -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" as="style" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
+    <!-- Critical fonts with display=swap -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" />
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -45,6 +41,9 @@ const { title, description = "A Premium Astro Blog", image = "/placeholder-socia
     <meta property="twitter:image" content={image} />
 
     <title>{title}</title>
+    
+    <!-- Allow pages to inject additional head elements -->
+    <slot name="head" />
   </head>
   <body>
     <Header />

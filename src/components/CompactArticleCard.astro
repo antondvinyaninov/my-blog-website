@@ -95,14 +95,20 @@ const {
     href={`/blog/${post.slug}`} 
     class="flex-shrink-0 w-full sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 h-48 rounded-2xl overflow-hidden bg-slate-100 cursor-pointer"
   >
-    <img 
-      src={coverImage} 
-      alt={post.title} 
-      class="w-full h-full object-cover transition-all duration-500 group-hover:brightness-90"
-      loading="lazy"
-      decoding="async"
-      width="320"
-      height="320"
-    />
+    <picture>
+      <source 
+        srcset={coverImage.replace(/\.(jpg|jpeg|png)$/i, '.webp')} 
+        type="image/webp"
+      />
+      <img 
+        src={coverImage} 
+        alt={post.title} 
+        class="w-full h-full object-cover transition-all duration-500 group-hover:brightness-90"
+        loading="lazy"
+        decoding="async"
+        width="320"
+        height="320"
+      />
+    </picture>
   </a>
 </article>

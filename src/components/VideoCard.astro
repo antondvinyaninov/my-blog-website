@@ -27,15 +27,21 @@ const {
 <article class={`group relative overflow-hidden rounded-3xl aspect-video cursor-pointer ${className}`}>
   <!-- Background Image -->
   <a href={`/blog/${post.slug}`} class="block w-full h-full">
-    <img 
-      src={coverImage} 
-      alt={post.title} 
-      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-      loading="lazy"
-      decoding="async"
-      width="640"
-      height="360"
-    />
+    <picture>
+      <source 
+        srcset={coverImage.replace(/\.(jpg|jpeg|png)$/i, '.webp')} 
+        type="image/webp"
+      />
+      <img 
+        src={coverImage} 
+        alt={post.title} 
+        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        loading="lazy"
+        decoding="async"
+        width="640"
+        height="360"
+      />
+    </picture>
   </a>
 
   <!-- Gradient Overlay -->
