@@ -1,8 +1,6 @@
 import type { APIRoute } from 'astro';
-import { getPosts } from '../../utils/posts-manager';
+import { getPostsFromSupabase } from '../../utils/posts-supabase';
 import { AUTHORS } from '../../data/authors';
-
-const POSTS = getPosts();
 
 export const prerender = false;
 
@@ -38,9 +36,12 @@ export const POST: APIRoute = async ({ request }) => {
         }), { status: 400 });
     }
 
+    // Get current posts count
+    const posts = await getPostsFromSupabase();
+    
     // Create a new post object
     const newPost = {
-        id: (POSTS.length + 1).toString(),
+        id: (posts.length + 1).toString(),
         title: body.title,
         slug: body.slug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
         excerpt: body.excerpt || '',

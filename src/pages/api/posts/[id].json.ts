@@ -1,17 +1,26 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
-import { getPosts } from '../../../utils/posts-manager';
+import { getPostsFromSupabase, getPostById } from '../../../utils/posts-supabase';
+import { POSTS as FALLBACK_POSTS } from '../../../data/posts';
 
-export const getStaticPaths: GetStaticPaths = () => {
-  const POSTS = getPosts();
-  return POSTS.map(post => ({
+export const getStaticPaths: GetStaticPaths = async () => {
+  let posts;
+  try {
+    posts = await getPostsFromSupabase();
+    if (posts.length === 0) {
+      posts = FALLBACK_POSTS;
+    }
+  } catch (error) {
+    posts = FALLBACK_POSTS;
+  }
+  
+  return posts.map(post => ({
     params: { id: post.id }
   }));
 };
 
 export const GET: APIRoute = async ({ params }) => {
   const { id } = params;
-  const POSTS = getPosts();
-  const post = POSTS.find(p => p.id === id);
+  const post = await getPostById(id!);
   
   if (!post) {
     return new Response(JSON.stringify({ error: 'Post not found' }), {

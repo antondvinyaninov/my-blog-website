@@ -5,10 +5,20 @@ import LatestArticlesSection from '../components/LatestArticlesSection.astro';
 import VideoCard from '../components/VideoCard.astro';
 import SectionHeader from '../components/SectionHeader.astro';
 import Newsletter from '../components/Newsletter.astro';
-import { getPosts } from '../utils/posts-manager';
+import { getPostsFromSupabase } from '../utils/posts-supabase';
+import { POSTS as FALLBACK_POSTS } from '../data/posts';
 
-// Data queries
-const POSTS = getPosts();
+// Data queries - загружаем из Supabase
+let POSTS;
+try {
+  POSTS = await getPostsFromSupabase();
+  if (POSTS.length === 0) {
+    POSTS = FALLBACK_POSTS;
+  }
+} catch (error) {
+  console.error('Error loading posts from Supabase:', error);
+  POSTS = FALLBACK_POSTS;
+}
 const heroPosts = POSTS.slice(0, 5); // 1 main + 4 magazine (1 main + 3 side)
 const latestPosts = POSTS.slice(1, 5); // 4 posts for latest articles section
 const videoPosts = POSTS.filter(p => p.type === 'video').slice(0, 3);

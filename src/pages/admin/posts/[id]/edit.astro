@@ -1,11 +1,21 @@
 ---
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import SubmissionForm from '../../../../components/SubmissionForm';
-import { getPosts } from '../../../../utils/posts-manager';
+import { getPostsFromSupabase } from '../../../../utils/posts-supabase';
+import { POSTS as FALLBACK_POSTS } from '../../../../data/posts';
 
-export function getStaticPaths() {
-  const POSTS = getPosts();
-  return POSTS.map(post => ({
+export async function getStaticPaths() {
+  let posts;
+  try {
+    posts = await getPostsFromSupabase();
+    if (posts.length === 0) {
+      posts = FALLBACK_POSTS;
+    }
+  } catch (error) {
+    posts = FALLBACK_POSTS;
+  }
+  
+  return posts.map(post => ({
     params: { id: post.id }
   }));
 }
