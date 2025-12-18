@@ -8,11 +8,15 @@ RUN npm ci
 
 # Build the app
 FROM base AS builder
+
+# Установка sharp для оптимизации изображений
+RUN apk add --no-cache vips-dev build-base python3
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Оптимизация изображений перед сборкой
-RUN npm run optimize:images || true
+RUN npm run optimize:images
 
 # Сборка приложения
 RUN npm run build
@@ -26,7 +30,6 @@ ENV PORT=4321
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/src ./src
 COPY package*.json ./
 
 # Создаем директорию для данных с правами на запись
