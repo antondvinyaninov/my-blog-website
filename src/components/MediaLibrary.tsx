@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { X, Check } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, Check, Upload } from 'lucide-react';
 
 interface MediaLibraryProps {
   onSelect: (url: string) => void;
@@ -17,9 +17,12 @@ interface MediaItem {
 export default function MediaLibrary({ onSelect, onClose, selectedUrl }: MediaLibraryProps) {
   const [images, setImages] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [selected, setSelected] = useState<string | undefined>(selectedUrl);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
+  const loadImages = () => {
+    setLoading(true);
     fetch('/api/media.json')
       .then(res => res.json())
       .then(data => {
@@ -30,7 +33,46 @@ export default function MediaLibrary({ onSelect, onClose, selectedUrl }: MediaLi
         console.error('Error loading images:', err);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    loadImages();
   }, []);
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload-image', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert(`✅ Изображение загружено!\nРазмер: ${Math.round(result.size / 1024)}KB\nЭкономия: ${result.savings}%`);
+        loadImages(); // Перезагружаем список
+        setSelected(result.url); // Автоматически выбираем загруженное изображение
+      } else {
+        alert(`❌ Ошибка: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('❌ Ошибка при загрузке изображения');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
 
   const handleSelect = () => {
     if (selected) {
@@ -44,12 +86,29 @@ export default function MediaLibrary({ onSelect, onClose, selectedUrl }: MediaLi
       <div className="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
           <h3 className="text-xl font-bold text-slate-900">Выбрать изображение</h3>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-          >
-            <X size={20} />
-          </button>
+          <div className="flex items-center gap-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+            >
+              <Upload size={18} />
+              {uploading ? 'Загрузка...' : 'Загрузить'}
+            </button>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-6">

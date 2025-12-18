@@ -1,18 +1,58 @@
 import type { APIRoute } from 'astro';
+import { supabase } from '../../lib/supabase';
 import fs from 'fs';
 import path from 'path';
 
 export const GET: APIRoute = async () => {
   try {
+    // Получаем изображения из Supabase Storage
+    const { data: storageFiles, error } = await supabase.storage
+      .from('blog-images')
+      .list('', {
+        limit: 100,
+        sortBy: { column: 'created_at', order: 'desc' }
+      });
+
+    if (error) {
+      console.error('Supabase storage error:', error);
+      // Fallback на локальные файлы
+      return getLocalImages();
+    }
+
+    const images = storageFiles.map(file => {
+      const { data: { publicUrl } } = supabase.storage
+        .from('blog-images')
+        .getPublicUrl(file.name);
+
+      return {
+        name: file.name,
+        url: publicUrl,
+        size: file.metadata?.size || 0,
+        modified: file.created_at
+      };
+    });
+
+    return new Response(JSON.stringify(images), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+  } catch (error) {
+    console.error('Media API error:', error);
+    return getLocalImages();
+  }
+};
+
+// Fallback на локальные файлы
+function getLocalImages() {
+  try {
     const imagesDir = path.join(process.cwd(), 'public', 'images');
     
-    // Проверяем существование директории
     if (!fs.existsSync(imagesDir)) {
       return new Response(JSON.stringify([]), {
         status: 200,
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' }
       });
     }
     
@@ -29,17 +69,12 @@ export const GET: APIRoute = async () => {
     
     return new Response(JSON.stringify(images), {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error('Media API error:', error);
     return new Response(JSON.stringify([]), {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' }
     });
   }
-};
+}
